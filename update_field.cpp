@@ -25,12 +25,50 @@ void UpdateTicket(AirlineTicket& ticket, const map<string, string>& updates) {
 
 }
  */
-
-#define UPDATE_FIELD(ticket, field, values)  // Реализуйте этот макрос, а также необходимые операторы для классов Date и Time
-
-void UpdateTicket(AirlineTicket& ticket, const map<string, string>& updates) {
-
+ostream& operator << (ostream& os, const Date& date) {
+	os << date.year << "-" << date.month << "-" << date.day;
+	return os;
 }
+
+ostream& operator << (ostream& os, const Time& time) {
+	os << time.hours << ":" << time.minutes;
+	return os;
+}
+
+bool operator == (const Date& lhs, const Date& rhs) {
+	return lhs.year == rhs.year && lhs.month == rhs.month && lhs.day == rhs.day;
+}
+
+bool operator == (const Time& lhs, const Time& rhs) {
+	return lhs.hours == rhs.hours && lhs.minutes == rhs.minutes;
+}
+
+istream& operator >> (istringstream& is, Date& date) {
+	is >> date.year;
+	is.ignore(1);
+	is >> date.month;
+	is.ignore(1);
+	is >> date.day;
+	return is;
+}
+
+istream& operator >> (istringstream& is, Time& time) {
+	is >> time.hours;
+	is.ignore(1);
+	is >> time.minutes;
+	return is;
+}
+
+
+#define UPDATE_FIELD(ticket, field, values) {   \
+	auto it = values.find(#field);				\
+	if(it != values.end()) {					\
+	istringstream is(it->second); 				\
+	is >> ticket.field;							\
+	} 											\
+}
+
+void UpdateTicket(AirlineTicket& ticket, const map<string, string>& updates);
 
 void TestUpdate() {
   AirlineTicket t;

@@ -19,7 +19,7 @@ public:
 
 	T& operator[] (size_t index) {
 		if (index < vFront.size()) {
-			return vFront.at(index);
+			return vFront.at(vFront.size() - index - 1);
 		} else if (index < vFront.size() + vBack.size()) {
 			return vBack.at(index - vFront.size());
 		} else {
@@ -28,7 +28,7 @@ public:
 	}
 	const T& operator[] (size_t index) const {
 		if (index < vFront.size()) {
-			return vFront.at(index);
+			return vFront.at(vFront.size() - index - 1);
 		} else if (index < vFront.size() + vBack.size()) {
 			return vBack.at(index - vFront.size());
 		} else {
@@ -39,7 +39,7 @@ public:
 
 	T& At(size_t index) {
 		if (index < vFront.size()) {
-			return vFront.at(index);
+			return vFront.at(vFront.size() - index - 1);
 		} else if (index < vFront.size() + vBack.size()) {
 			return vBack.at(index - vFront.size());
 		} else {
@@ -48,7 +48,7 @@ public:
 	}
 	const T& At(size_t index) const {
 		if (index < vFront.size()) {
-			return vFront.at(index);
+			return vFront.at(vFront.size() - index - 1);
 		} else if (index < vFront.size() + vBack.size()) {
 			return vBack.at(index - vFront.size());
 		} else {
@@ -59,7 +59,7 @@ public:
 
 	const T& Front () const {
 		if (!vFront.empty()) {
-			return vFront[0];
+			return vFront[vFront.size() - 1];
 		} else if (!vBack.empty()) {
 			return vBack[0];
 		} else {
@@ -68,7 +68,7 @@ public:
 	}
 	T& Front() {
 		if (!vFront.empty()) {
-			return vFront[0];
+			return vFront[vFront.size() - 1];
 		} else if (!vBack.empty()) {
 			return vBack[0];
 		} else {
@@ -97,7 +97,7 @@ public:
 	}
 
 	void PushFront(const T& value) {
-		vFront.insert(vFront.begin(), value);
+		vFront.push_back(value);
 	}
 	void PushBack(const T& value) {
 		vBack.push_back(value);

@@ -80,7 +80,7 @@ public:
 		if (!vBack.empty()) {
 			return vBack[vBack.size()-1];
 		} else if (!vFront.empty()) {
-			return vFront[vFront.size()-1];
+			return vFront[0];
 		}
 		else {
 			throw out_of_range("no index in const Back");
@@ -90,7 +90,7 @@ public:
 		if (!vBack.empty()) {
 			return vBack[vBack.size() - 1];
 		} else if (!vFront.empty()) {
-			return vFront[vFront.size() - 1];
+			return vFront[0];
 		} else {
 			throw out_of_range("no index in Back");
 		}

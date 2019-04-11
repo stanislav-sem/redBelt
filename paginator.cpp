@@ -7,58 +7,74 @@
 using namespace std;
 
 template <typename Iterator>
+class IteratorRange {
+private:
+	Iterator first, last;
+public:
+	IteratorRange (Iterator f, Iterator l) : first(f), last(l) {}
+
+	Iterator begin() { return first; }
+	Iterator end()   { return last; }
+
+	size_t size() { return last - first; }
+};
+
+
+template <typename Iterator>
 class Paginator {
 private:
 	Iterator first, last;
 	size_t page_size;
-	vector<Iterator> pag;
+	vector<IteratorRange<Iterator>> pag;
 
 public:
 	Paginator (Iterator b, Iterator e, size_t s) : first(b), last(e), page_size(s) {
+		cout << "size = " << size() << endl;
 		for (int i = 0; i <= size(); i++) {
+//			cout << "processing\n";
 			if (i == 0) {
-				pag.assign(first, next(first, page_size));
+				pag.push_back({first, next(first, page_size)});
 			} else if (i == size()) {
-				pag.push_back(next(first, i * page_size), last);
+				pag.push_back({next(first, i * page_size), last});
 			} else {
-				pag.push_back(next(first, i * page_size), next(first, (i+1) * page_size));
+				pag.push_back({next(first, i * page_size), next(first, (i+1) * page_size)});
 			}
 		}
 	};
 
 	size_t size() const {
+		int size = 0;
+		size = (last - first) / page_size;
 		if ((first - last) % page_size == 0) {
+//			cout <<"case 1:" << size << endl;
 			return (first - last) / page_size;
 		} else {
+//			cout <<"case 2:" << size +1 << endl;
 			return (first - last) / page_size  +1;
 		}
 	}
 
-	Iterator begin() { return first; }
+	Iterator begin() { return pag.begin(); }
 
-	Iterator end() { return last; }
-
-
-
-
+	Iterator end() { return pag.end(); }
 };
 
-//template <typename C>
-//??? Paginate(C& c, size_t page_size) {
-//	// Реализуйте этот шаблон функции
-//}
-//
-//void TestPageCounts() {
-//  vector<int> v(15);
-//
-//  ASSERT_EQUAL(Paginate(v, 1).size(), v.size());
-//  ASSERT_EQUAL(Paginate(v, 3).size(), 5u);
-//  ASSERT_EQUAL(Paginate(v, 5).size(), 3u);
-//  ASSERT_EQUAL(Paginate(v, 4).size(), 4u);
-//  ASSERT_EQUAL(Paginate(v, 15).size(), 1u);
-//  ASSERT_EQUAL(Paginate(v, 150).size(), 1u);
-//  ASSERT_EQUAL(Paginate(v, 14).size(), 2u);
-//}
+template <typename C>
+auto Paginate(C& c, size_t page_size) {
+	return Paginator<typename C::iterator>{c.begin(), c.end(), page_size};
+}
+
+void TestPageCounts() {
+  vector<int> v(15);
+
+  ASSERT_EQUAL(Paginate(v, 1).size(), v.size());
+  ASSERT_EQUAL(Paginate(v, 3).size(), 5u);
+  ASSERT_EQUAL(Paginate(v, 5).size(), 3u);
+  ASSERT_EQUAL(Paginate(v, 4).size(), 4u);
+  ASSERT_EQUAL(Paginate(v, 15).size(), 1u);
+  ASSERT_EQUAL(Paginate(v, 150).size(), 1u);
+  ASSERT_EQUAL(Paginate(v, 14).size(), 2u);
+}
 
 //void TestLooping() {
 //  vector<int> v(15);
@@ -141,11 +157,12 @@ public:
 
 int main() {
   TestRunner tr;
-//  RUN_TEST(tr, TestPageCounts);
+  RUN_TEST(tr, TestPageCounts);
 //  RUN_TEST(tr, TestLooping);
 //  RUN_TEST(tr, TestModification);
 //  RUN_TEST(tr, TestPageSizes);
 //  RUN_TEST(tr, TestConstContainer);
 //  RUN_TEST(tr, TestPagePagination);
+  return 0;
 }
 

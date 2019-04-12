@@ -96,17 +96,17 @@ private:
 };
 
 #define ASSERT_EQUAL(x, y) {            \
-  ostringstream _ostream_;                     \
-  _ostream_<< #x << " != " << #y << ", "      \
+  ostringstream _uniqstreamname_;                     \
+  _uniqstreamname_<< #x << " != " << #y << ", "      \
     << __FILE__ << ":" << __LINE__;     \
-  AssertEqual(x, y, _ostream_.str());          \
+  AssertEqual(x, y, _uniqstreamname_.str());          \
 }
 
 #define ASSERT(x) {                     \
-  ostringstream xxxx;                     \
-  os << #x << " is false, "             \
+  ostringstream _uniqstreamname_;                     \
+  _uniqstreamname_ << #x << " is false, "             \
     << __FILE__ << ":" << __LINE__;     \
-  Assert(x, xxxx.str());                  \
+  Assert(x, _uniqstreamname_.str());                  \
 }
 
 #define RUN_TEST(tr, func) \

@@ -39,15 +39,22 @@ public:
         return result;
     }
     const set<int>& reachable_stations = reachable_lists_.at(start);
-    if (!reachable_stations.empty()) {
-      result = min(
-          result,
-          abs(finish - *min_element(
-              begin(reachable_stations), end(reachable_stations),
-              [finish](int lhs, int rhs) { return abs(lhs - finish) < abs(rhs - finish); }
-          ))
-      );
+    const auto finish_pos = reachable_stations.lower_bound(finish);
+    if (finish_pos != end(reachable_stations)) {
+    	result = min(result, abs(finish - *finish_pos));
     }
+    if (finish_pos != begin(reachable_stations)) {
+    	result = min(result, abs(finish - *prev(finish_pos)));
+    }
+//    if (!reachable_stations.empty()) {
+//      result = min(
+//          result,
+//          abs(finish - *min_element(
+//              begin(reachable_stations), end(reachable_stations),
+//              [finish](int lhs, int rhs) { return abs(lhs - finish) < abs(rhs - finish); }
+//          ))
+//      );
+//    }
     return result;
   }
 private:

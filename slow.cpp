@@ -5,64 +5,95 @@
 #include <set>
 #include <deque>
 #include <map>
+#include "test_runner.h"
 
 using namespace std;
 
 struct Order {
-	long long time;
+	int64_t time;
 	string hotel_name;
-	int client_id;
-	int room_count;
+	unsigned long client_id;
+	unsigned long room_count;
 };
 
 class BookingManager {
 public:
 	BookingManager() : current_time(0), BookData(), rooms_count(), clients_count() {}
 
-	void Book(long long inp_time, string inp_hotel_name, int inp_client_id, int inp_room_count) {
+	void Book(int64_t inp_time, string inp_hotel_name, unsigned long inp_client_id, unsigned long inp_room_count) {
 		current_time = inp_time; // сохраняем текущее время
-		long long day = current_time - 86400;
-		while(BookData.front().time <= day) {  // удаляем брони сделанные больше суток назад
+		int64_t day = current_time - 86400;
+		while(BookData.front().time <= day && !BookData.empty()) {  // удаляем брони сделанные больше суток назад
 			rooms_count[BookData.front().hotel_name] -= BookData.front().room_count;
 			clients_count[BookData.front().hotel_name].erase(BookData.front().client_id);
 			BookData.pop_front();
 		}
 		BookData.push_back({inp_time, inp_hotel_name, inp_client_id, inp_room_count}); // сохраняем бронь отеля
 		rooms_count[inp_hotel_name] += inp_room_count;  // сохраняем количество занятых комнат для этого отеля
-		clients_count[inp_hotel_name].insert(inp_client_id);
+		clients_count[inp_hotel_name].insert(inp_client_id); // сохраняем количество разных клиентов для этого отеля
 
 	}
 
 	int Clients(string inp_hotel_name) {
-//		int result = 0;
-//		set<int> unique_id;
-//		for (size_t i = 0; i < BookData.size(); i++) {
-//			if(BookData[i].hotel_name == inp_hotel_name) {
-//				unique_id.insert(BookData[i].client_id);
-//			}
-//		}
-//		result = unique_id.size();
 		return clients_count[inp_hotel_name].size();
 	}
 
 	int Rooms(string inp_hotel_name) {
-//		int result = 0;
-//		for (size_t i = 0; i < BookData.size(); i++) {
-//			if(BookData[i].hotel_name == inp_hotel_name) {
-//				result += BookData[i].room_count;
-//			}
-//		}
-//		return result;
 		return rooms_count[inp_hotel_name];
 	}
 
 private:
-	long long current_time;
+	int64_t current_time;
 	deque<Order> BookData;
-	map<string, int> rooms_count;
-	map<string, set<int>> clients_count;
+	map<string, unsigned long> rooms_count;
+	map<string, set<unsigned long>> clients_count;
 };
 
+//void PrintBook(const BookingManager& input) {
+//	for (auto& el : input.BookData) {
+//		cout << "time: " << el.time << "; hotel name: " << el.hotel_name
+//			 << "; client_id: " << el.client_id << "; room count: " << el.room_count << endl;
+//	}
+//}
+//
+//void PrintClients(map<string, set<unsigned long>> input) {
+//	for (auto& el : input) {
+//		cout << el.first<< ": ";
+//		for (auto& v : el.second) {
+//			cout << v << " ";
+//		}
+//		cout << endl;
+//	}
+//}
+
+void TestFirst() {
+	BookingManager bm;
+	ASSERT_EQUAL(bm.Clients("Marriot"), 0);
+	ASSERT_EQUAL(bm.Rooms("Marriot"), 0);
+	bm.Book(10, "FourSeasons", 1, 2);
+	bm.Book(10, "Marriott", 1, 1);
+	bm.Book(86409, "FourSeasons", 2, 1);
+	ASSERT_EQUAL(bm.Clients("FourSeasons"), 2);
+	ASSERT_EQUAL(bm.Rooms("FourSeasons"), 3);
+	ASSERT_EQUAL(bm.Clients("Marriott"), 1);
+	bm.Book(86410, "Marriott", 2, 10);
+	ASSERT_EQUAL(bm.Rooms("FourSeasons"), 1);
+	ASSERT_EQUAL(bm.Rooms("Marriott"), 10);
+}
+
+void TestSecond() {
+	BookingManager bm;
+	bm.Book(-10'000'000'000'000'000, "azaza", 1, 5);
+//	PrintClients(bm.clients_count);
+//	PrintBook(bm);
+	ASSERT_EQUAL(bm.Clients("azaza"), 1);
+	ASSERT_EQUAL(bm.Rooms("azaza"), 5);
+	bm.Book(0, "azaza", 66, 1);
+//	PrintClients(bm.clients_count);
+//	PrintBook(bm);
+	ASSERT_EQUAL(bm.Rooms("azaza"), 1);
+	ASSERT_EQUAL(bm.Clients("azaza"), 1);
+}
 
 int main() {
   // Для ускорения чтения данных отключается синхронизация
@@ -70,6 +101,9 @@ int main() {
   // а также выполняется отвязка cin от cout
   ios::sync_with_stdio(false);
   cin.tie(nullptr);
+  TestRunner tr;
+  RUN_TEST(tr, TestFirst);
+  RUN_TEST(tr, TestSecond);
 
   BookingManager manager;
 
@@ -81,7 +115,7 @@ int main() {
     cin >> query_type;
 
     if (query_type == "BOOK") {
-      long long time;
+      int64_t time;
       string hotel_name;
       int client_id;
       int room_count;

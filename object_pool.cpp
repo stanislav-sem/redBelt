@@ -12,48 +12,55 @@ using namespace std;
 template<class T>
 class ObjectPool {
 public:
-	ObjectPool() : all(), deAll() {};
+	ObjectPool() : active(), free() {};
 
 	T* Allocate() {
-		if (!deAll.empty()) {
-			all.push_back(deAll.front());
-			deAll.pop_front();
-			return all.back();
+		if (!free.empty()) {
+			active.push_back(free.front());
+			free.pop_front();
+			return active.back();
 		}
 		else {
 			T* pT = new T;
-			all.push_back(pT);
+			active.push_back(pT);
 			return pT;
 		}
 	}
 
 	T* TryAllocate() {
-		if (!deAll.empty()) {
-			all.push_back(deAll.front());
-			deAll.pop_front();
-			return all.back();
+		if (!free.empty()) {
+			active.push_back(free.front());
+			free.pop_front();
+			return active.back();
 		} else {
 			return nullptr;
 		}
 	}
 
 	void Deallocate(T* object) {
-		auto it = find(deAll.begin(), deAll.end(), object);
-		if (it == deAll.end()) {
-			throw invalid_argument("wrong object");
-		} else {
-			all.push_back(*it);
-			deAll.erase(it);
+		auto it = find(active.begin(), active.end(), object);
+		if (it == active.end()) {
+			throw invalid_argument("No such object!");
 		}
+		free.push_back(*it);
+		active.erase(it);
 	}
 
 	~ObjectPool() {
-		cout << "Desruction"<< endl;
+		while(!active.empty()) {
+			delete active.front();
+			active.erase(active.begin());
+		}
+		while(!free.empty()) {
+			delete free.front();
+			free.erase(free.begin());
+		}
+
 	};
 
 private:
-	deque<T*> all;
-	deque<T*> deAll;
+	deque<T*> active;
+	deque<T*> free;
 };
 
 void TestObjectPool() {
@@ -69,13 +76,13 @@ void TestObjectPool() {
 
   pool.Deallocate(p2);
   ASSERT_EQUAL(*pool.Allocate(), "second");
-//
-//  pool.Deallocate(p3);
-//  pool.Deallocate(p1);
-//  ASSERT_EQUAL(*pool.Allocate(), "third");
-//  ASSERT_EQUAL(*pool.Allocate(), "first");
-//
-//  pool.Deallocate(p1);
+
+  pool.Deallocate(p3);
+  pool.Deallocate(p1);
+  ASSERT_EQUAL(*pool.Allocate(), "third");
+  ASSERT_EQUAL(*pool.Allocate(), "first");
+
+  pool.Deallocate(p1);
 }
 
 int main() {

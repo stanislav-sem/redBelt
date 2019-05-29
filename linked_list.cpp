@@ -22,7 +22,7 @@ public:
 
 
   ~LinkedList() {
-	 while(head->next != nullptr) {
+	 while(head != nullptr) {
 		 Node* tmp = head-> next;
 		 delete head;
 		 head = tmp;
@@ -47,13 +47,10 @@ public:
 	  }
   }
   void PopFront() {
-	if(head->next != nullptr) {
+	if(head != nullptr) {
 		Node* tmp = head-> next;
 		delete head;
 		head = tmp;
-	} else {
-		delete head;
-		head = nullptr;
 	}
   }
 
@@ -130,25 +127,30 @@ void TestInsertAfter() {
 //  ASSERT_EQUAL(list.GetHead()->value, 5);
 //}
 //
+
+void TestNull() {
+	LinkedList<int> list;
+	ASSERT(list.GetHead() == nullptr);
+}
+
 void TestPopFront() {
   LinkedList<int> list;
 
   for (int i = 1; i <= 5; ++i) {
     list.PushFront(i);
   }
-  PrintVec(ToVector(list));
   for (int i = 1; i <= 5; ++i) {
     list.PopFront();
   }
-  PrintVec(ToVector(list));
-  ASSERT(list.GetHead() == nullptr);
+ ASSERT(list.GetHead() == nullptr);
 }
 
 int main() {
   TestRunner tr;
   RUN_TEST(tr, TestPushFront);
   RUN_TEST(tr, TestInsertAfter);
-//  RUN_TEST(tr, TestRemoveAfter);
+  RUN_TEST(tr, TestNull);
   RUN_TEST(tr, TestPopFront);
+//  RUN_TEST(tr, TestRemoveAfter);
   return 0;
 }

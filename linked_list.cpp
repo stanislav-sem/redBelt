@@ -4,6 +4,15 @@
 using namespace std;
 
 template <typename T>
+void PrintVec(vector<T> input) {
+	cout  << '{';
+	for (auto el : input) {
+		cout << el << ',';
+	}
+	cout << '}' << endl;
+}
+
+template <typename T>
 class LinkedList {
 public:
   struct Node {
@@ -13,7 +22,11 @@ public:
 
 
   ~LinkedList() {
-	  cout << "Destructor GAG!" << endl;
+	 while(head->next != nullptr) {
+		 Node* tmp = head-> next;
+		 delete head;
+		 head = tmp;
+	 }
   }
 
   void PushFront(const T& value) {
@@ -28,12 +41,23 @@ public:
 		  PushFront(value);
 	  } else {
 		  Node* newNode = new Node;
+		  newNode->value = value;
 		  newNode->next = node->next;
 		  node->next = newNode;
 	  }
   }
+  void PopFront() {
+	if(head->next != nullptr) {
+		Node* tmp = head-> next;
+		delete head;
+		head = tmp;
+	} else {
+		delete head;
+		head = nullptr;
+	}
+  }
+
   void RemoveAfter(Node* node);
-  void PopFront();
 
   Node* GetHead() { return head; }
   const Node* GetHead() const { return head; }
@@ -106,23 +130,25 @@ void TestInsertAfter() {
 //  ASSERT_EQUAL(list.GetHead()->value, 5);
 //}
 //
-//void TestPopFront() {
-//  LinkedList<int> list;
-//
-//  for (int i = 1; i <= 5; ++i) {
-//    list.PushFront(i);
-//  }
-//  for (int i = 1; i <= 5; ++i) {
-//    list.PopFront();
-//  }
-//  ASSERT(list.GetHead() == nullptr);
-//}
+void TestPopFront() {
+  LinkedList<int> list;
+
+  for (int i = 1; i <= 5; ++i) {
+    list.PushFront(i);
+  }
+  PrintVec(ToVector(list));
+  for (int i = 1; i <= 5; ++i) {
+    list.PopFront();
+  }
+  PrintVec(ToVector(list));
+  ASSERT(list.GetHead() == nullptr);
+}
 
 int main() {
   TestRunner tr;
   RUN_TEST(tr, TestPushFront);
   RUN_TEST(tr, TestInsertAfter);
 //  RUN_TEST(tr, TestRemoveAfter);
-//  RUN_TEST(tr, TestPopFront);
+  RUN_TEST(tr, TestPopFront);
   return 0;
 }

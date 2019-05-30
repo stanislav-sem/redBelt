@@ -27,6 +27,7 @@ public:
 		 delete head;
 		 head = tmp;
 	 }
+//	  cout << "GAG" << endl;
   }
 
   void PushFront(const T& value) {
@@ -54,7 +55,17 @@ public:
 	}
   }
 
-  void RemoveAfter(Node* node);
+  void RemoveAfter(Node* node) {
+	  if (node == nullptr) {
+		  PopFront();
+	  } else {
+		  Node* tmp = node->next;
+		  if (tmp != nullptr) {
+			  node->next = tmp->next;
+			  delete tmp;
+		  }
+	  }
+  }
 
   Node* GetHead() { return head; }
   const Node* GetHead() const { return head; }
@@ -105,32 +116,43 @@ void TestInsertAfter() {
   ASSERT_EQUAL(ToVector(list), expected2);
 }
 
-//void TestRemoveAfter() {
-//  LinkedList<int> list;
-//  for (int i = 1; i <= 5; ++i) {
-//    list.PushFront(i);
-//  }
-//
-//  const vector<int> expected = {5, 4, 3, 2, 1};
-//  ASSERT_EQUAL(ToVector(list), expected);
-//
-//  auto next_to_head = list.GetHead()->next;
-//  list.RemoveAfter(next_to_head); // удаляем 3
-//  list.RemoveAfter(next_to_head); // удаляем 2
-//
-//  const vector<int> expected1 = {5, 4, 1};
-//  ASSERT_EQUAL(ToVector(list), expected1);
-//
-//  while (list.GetHead()->next) {
-//    list.RemoveAfter(list.GetHead());
-//  }
-//  ASSERT_EQUAL(list.GetHead()->value, 5);
-//}
-//
+void TestRemoveAfter() {
+  LinkedList<int> list;
+  for (int i = 1; i <= 5; ++i) {
+    list.PushFront(i);
+  }
+
+  const vector<int> expected = {5, 4, 3, 2, 1};
+  ASSERT_EQUAL(ToVector(list), expected);
+
+  auto next_to_head = list.GetHead()->next;
+  list.RemoveAfter(next_to_head); // удаляем 3
+  list.RemoveAfter(next_to_head); // удаляем 2
+
+//  PrintVec(ToVector(list));
+  const vector<int> expected1 = {5, 4, 1};
+  ASSERT_EQUAL(ToVector(list), expected1);
+
+   while (list.GetHead()->next) {
+    list.RemoveAfter(list.GetHead());
+  }
+  ASSERT_EQUAL(list.GetHead()->value, 5);
+}
+
 
 void TestNull() {
 	LinkedList<int> list;
 	ASSERT(list.GetHead() == nullptr);
+}
+
+void TestRemoveNull() {
+	LinkedList<int> list;
+	for(int i = 1; i <= 5; ++i) {
+		list.PushFront(i);
+	}
+	list.RemoveAfter(nullptr);
+	const vector<int> expected = {4, 3, 2, 1};
+	ASSERT_EQUAL(ToVector(list), expected);
 }
 
 void TestPopFront() {
@@ -151,6 +173,7 @@ int main() {
   RUN_TEST(tr, TestInsertAfter);
   RUN_TEST(tr, TestNull);
   RUN_TEST(tr, TestPopFront);
-//  RUN_TEST(tr, TestRemoveAfter);
+  RUN_TEST(tr, TestRemoveNull);
+  RUN_TEST(tr, TestRemoveAfter);
   return 0;
 }

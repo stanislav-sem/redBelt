@@ -10,6 +10,8 @@
 
 using namespace std;
 
+
+
 // TAirport should be enum with sequential items and last item TAirport::Last_
 template <typename TAirport>
 class AirportCounter {
@@ -20,14 +22,21 @@ public:
   // конструктор от диапазона элементов типа TAirport
   template <typename TIterator>
   AirportCounter(TIterator begin, TIterator end) {
-	  for (auto& el : {begin, end-1}) {
-		  data[el] = 0;
+	  for (auto& el : {begin, end}) {
+		  try {
+			  data.at(*el);
+			  data[*el]++;
+		  } catch(exception& ex) {
+			  data[*el] = 1;
+		  }
 	  }
+	  PrintData();
   }
 
   // получить количество элементов, равных данному
   size_t Get(TAirport airport) const {
-	  return data.size();
+//	  return data.size();
+	  return data[airport];
   }
 
   // добавить данный элемент
@@ -46,16 +55,27 @@ public:
   }
 
   using Item = pair<TAirport, size_t>;
-  using Items = /* ??? */;
+  using Items = vector<Item>;
 
   // получить некоторый объект, по которому можно проитерироваться,
   // получив набор объектов типа Item - пар (аэропорт, количество),
   // упорядоченных по аэропорту
-  Items GetItems() const;
+  Items GetItems() const {
+	  return {data.begin(), data.end()};
+  }
+
+  void PrintData() {
+	  int i = 0;
+	  for (auto& el : data) {
+		  cout << "Key " << i++  << " Value " << el.second << "\n";
+	  }
+  }
 
 private:
   map<TAirport, int> data;
 };
+
+// --------------------------------------------------------------------------------------------------------------------------------------
 
 void TestMoscow() {
   enum class MoscowAirport {
@@ -126,6 +146,7 @@ enum class SmallCountryAirports {
   Last_
 };
 
+// --------------------------------------------------------------------------------------------------------------------------------------
 void TestManyConstructions() {
   default_random_engine rnd(20180623);
   uniform_int_distribution<size_t> gen_airport(
@@ -223,8 +244,8 @@ int main() {
 
   LOG_DURATION("Total tests duration");
   RUN_TEST(tr, TestMoscow);
-  RUN_TEST(tr, TestManyConstructions);
-  RUN_TEST(tr, TestManyGetItems);
-  RUN_TEST(tr, TestMostPopularAirport);
+//  RUN_TEST(tr, TestManyConstructions);
+//  RUN_TEST(tr, TestManyGetItems);
+//  RUN_TEST(tr, TestMostPopularAirport);
   return 0;
 }

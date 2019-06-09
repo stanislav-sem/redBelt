@@ -6,52 +6,52 @@
 #include <iostream>
 #include <random>
 #include <vector>
-#include <map>
+#include <cstdint>
+
 
 using namespace std;
 
-
+void PrintCont(vector<uint32_t> input) {
+	for (size_t i = 0; i < input.size(); i++) {
+		cout << i << " : " << input[i] << "\n";
+	}
+	cout << endl;
+}
 
 // TAirport should be enum with sequential items and last item TAirport::Last_
 template <typename TAirport>
 class AirportCounter {
 public:
   // конструктор по умолчанию: список элементов пока пуст
-  AirportCounter() : data{} {};
+  AirportCounter() : db{} {};
 
   // конструктор от диапазона элементов типа TAirport
   template <typename TIterator>
-  AirportCounter(TIterator begin, TIterator end) {
-	  for (auto& el : {begin, end}) {
-		  try {
-			  data.at(*el);
-			  data[*el]++;
-		  } catch(exception& ex) {
-			  data[*el] = 1;
-		  }
+  AirportCounter(TIterator begin, TIterator end)  {
+	  db.fill(0);
+	  for (TIterator el = begin; el < end; el++) {
+		  db[static_cast<uint32_t>(*el)]++;
 	  }
-	  PrintData();
   }
 
   // получить количество элементов, равных данному
   size_t Get(TAirport airport) const {
-//	  return data.size();
-	  return data[airport];
+	  return db[static_cast<uint32_t>(airport)];
   }
 
   // добавить данный элемент
   void Insert(TAirport airport) {
-	  data[airport] = 0;
+	  db[static_cast<uint32_t>(airport)]++;
   }
 
   // удалить одно вхождение данного элемента
   void EraseOne(TAirport airport) {
-	  --data[airport];
+	  db[static_cast<uint32_t>(airport)]--;
   }
 
   // удалить все вхождения данного элемента
   void EraseAll(TAirport airport) {
-	  data[airport] = 0;
+	  db[static_cast<uint32_t>(airport)] = 0;
   }
 
   using Item = pair<TAirport, size_t>;
@@ -61,21 +61,16 @@ public:
   // получив набор объектов типа Item - пар (аэропорт, количество),
   // упорядоченных по аэропорту
   Items GetItems() const {
-	  return {data.begin(), data.end()};
-  }
-
-  void PrintData() {
-	  int i = 0;
-	  for (auto& el : data) {
-		  cout << "Key " << i++  << " Value " << el.second << "\n";
+	  vector<Item> tmp(db.size());
+	  for (uint32_t el = 0; el < db.size(); el ++) {
+		  tmp[el] = make_pair(static_cast<TAirport>(el), db[el]);
 	  }
+	  return tmp;
   }
 
 private:
-  map<TAirport, int> data;
+  array<uint32_t, static_cast<uint32_t>(TAirport::Last_)> db;
 };
-
-// --------------------------------------------------------------------------------------------------------------------------------------
 
 void TestMoscow() {
   enum class MoscowAirport {
@@ -92,6 +87,7 @@ void TestMoscow() {
       MoscowAirport::ZIA,
       MoscowAirport::SVO,
   };
+
   AirportCounter<MoscowAirport> airport_counter(begin(airports), end(airports));
 
   ASSERT_EQUAL(airport_counter.Get(MoscowAirport::VKO), 1);
@@ -146,7 +142,6 @@ enum class SmallCountryAirports {
   Last_
 };
 
-// --------------------------------------------------------------------------------------------------------------------------------------
 void TestManyConstructions() {
   default_random_engine rnd(20180623);
   uniform_int_distribution<size_t> gen_airport(
@@ -243,9 +238,21 @@ int main() {
   // Кроме того, не забудьте включить оптимизации при компиляции кода.
 
   LOG_DURATION("Total tests duration");
-  RUN_TEST(tr, TestMoscow);
-//  RUN_TEST(tr, TestManyConstructions);
-//  RUN_TEST(tr, TestManyGetItems);
-//  RUN_TEST(tr, TestMostPopularAirport);
+  {
+	  LOG_DURATION("TestMoscow");
+	  RUN_TEST(tr, TestMoscow);
+  }
+  {
+	  LOG_DURATION("TestManyConstructions");
+	  RUN_TEST(tr, TestManyConstructions);
+  }
+  {
+	  LOG_DURATION("TestManyGetItems");
+	  RUN_TEST(tr, TestManyGetItems);
+  }
+  {
+	  LOG_DURATION("TestMostPopularAirport");
+	  RUN_TEST(tr, TestMostPopularAirport);
+  }
   return 0;
 }

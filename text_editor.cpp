@@ -1,26 +1,53 @@
 #include <string>
+#include <string_view>
 #include "test_runner.h"
 using namespace std;
 
 class Editor {
 public:
 	// Реализуйте конструктор по умолчанию и объявленные методы
-	Editor(): pos{} {};
-	void Left();   // сдвинуть курсор влево
+	Editor(): text{} { flag = false; };
 
-	void Right();  // сдвинуть курсор вправо
-	void Insert(char token);   // вставить символ token
-	void Copy(size_t tokens);  // cкопировать
+	void Left() {   		// сдвинуть курсор влево
+		if (pos == 0) {
+			return;
+		}
+		--pos;
+	}
+
+	void Right() {  		// сдвинуть курсор вправо
+		if(pos == text.size()) {
+			return;
+		}
+		++pos;
+	}
+
+	// вставить символ token
+	void Insert(char token) {
+		string_view tmp = text;
+		text = tmp.substr(pos);
+	}
+
+	void Copy(size_t tokens) {  // cкопировать
 							   // не более tokens символов,
-							   // начиная с текущей позиции курсора
-	void Cut(size_t tokens);  // вырезать не более tokens символов,
+	}						   // начиная с текущей позиции курсора
+
+	void Cut(size_t tokens) {  // вырезать не более tokens символов,
 							  // начиная с текущей позиции курсора
-	void Paste();  // вставить содержимое буфера
+	}
+
+	void Paste() {   // вставить содержимое буфера
 				   // в текущую позицию курсора
-	string GetText() const;  // получить текущее содержимое
-							 // текстового редактора
+	}
+
+	string GetText() const {  // получить текущее содержимое текстового редактора
+		return text;
+	}
 private:
 	size_t pos = 0;
+	string text;
+	string_view buffer;
+	bool flag;
 };
 
 void TypeText(Editor& editor, const string& text) {

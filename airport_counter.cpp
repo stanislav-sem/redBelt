@@ -7,6 +7,7 @@
 #include <random>
 #include <vector>
 #include <cstdint>
+#include <utility>
 
 
 using namespace std;
@@ -28,48 +29,49 @@ public:
   // конструктор от диапазона элементов типа TAirport
   template <typename TIterator>
   AirportCounter(TIterator begin, TIterator end)  {
-	  db.fill(0);
+	  for (uint32_t i = 0; i < static_cast<uint32_t>(TAirport::Last_) ; i++) {
+		  db[static_cast<uint32_t>(i)].first = static_cast<TAirport>(i);
+		  db[static_cast<uint32_t>(i)].second = 0;
+	  }
+//	  db.fill({TAirport::Last_, 0});
 	  for (TIterator el = begin; el < end; el++) {
-		  db[static_cast<uint32_t>(*el)]++;
+		  db[static_cast<uint32_t>(*el)].first = *el;
+		  db[static_cast<uint32_t>(*el)].second++;
 	  }
   }
 
   // получить количество элементов, равных данному
   size_t Get(TAirport airport) const {
-	  return db[static_cast<uint32_t>(airport)];
+	  return db[static_cast<uint32_t>(airport)].second;
   }
 
   // добавить данный элемент
   void Insert(TAirport airport) {
-	  db[static_cast<uint32_t>(airport)]++;
+	  db[static_cast<uint32_t>(airport)].second++;
   }
 
   // удалить одно вхождение данного элемента
   void EraseOne(TAirport airport) {
-	  db[static_cast<uint32_t>(airport)]--;
+	  db[static_cast<uint32_t>(airport)].second--;
   }
 
   // удалить все вхождения данного элемента
   void EraseAll(TAirport airport) {
-	  db[static_cast<uint32_t>(airport)] = 0;
+	  db[static_cast<uint32_t>(airport)].second = 0;
   }
 
   using Item = pair<TAirport, size_t>;
-  using Items = vector<Item>;
+  using Items = array<Item, static_cast<uint32_t>(TAirport::Last_)>;
 
   // получить некоторый объект, по которому можно проитерироваться,
   // получив набор объектов типа Item - пар (аэропорт, количество),
   // упорядоченных по аэропорту
   Items GetItems() const {
-	  vector<Item> tmp(db.size());
-	  for (uint32_t el = 0; el < db.size(); el ++) {
-		  tmp[el] = make_pair(static_cast<TAirport>(el), db[el]);
-	  }
-	  return tmp;
+	  return db;
   }
 
 private:
-  array<uint32_t, static_cast<uint32_t>(TAirport::Last_)> db;
+  array<pair<TAirport, size_t>, static_cast<uint32_t>(TAirport::Last_)> db;
 };
 
 void TestMoscow() {

@@ -1,12 +1,15 @@
 #include <string>
 #include <string_view>
+#include <list>
 #include "test_runner.h"
 using namespace std;
 
 class Editor {
 public:
 	// Реализуйте конструктор по умолчанию и объявленные методы
-	Editor(): text{} { flag = false; };
+	Editor(): text{}, buffer{} {
+		pos = 0;
+	}
 
 	void Left() {   		// сдвинуть курсор влево
 		if (pos == 0) {
@@ -24,30 +27,34 @@ public:
 
 	// вставить символ token
 	void Insert(char token) {
-		string_view tmp = text;
-		text = tmp.substr(pos);
+		text.insert(pos, 1, token);
+		Right();
 	}
 
-	void Copy(size_t tokens) {  // cкопировать
-							   // не более tokens символов,
-	}						   // начиная с текущей позиции курсора
-
-	void Cut(size_t tokens) {  // вырезать не более tokens символов,
-							  // начиная с текущей позиции курсора
+	// cкопировать не более tokens символов,  начиная с текущей позиции курсора
+	void Copy(size_t tokens) {
+		text.copy(buffer, tokens, pos);
 	}
 
-	void Paste() {   // вставить содержимое буфера
-				   // в текущую позицию курсора
+	// вырезать не более tokens символов, начиная с текущей позиции курсора
+	void Cut(size_t tokens) {
+		text.copy(buffer, tokens, pos);
+		text.erase(pos, tokens);
+	}
+
+	// вставить содержимое буфера в текущую позицию курсора
+	void Paste() {
+		text.insert(pos, buffer);
 	}
 
 	string GetText() const {  // получить текущее содержимое текстового редактора
 		return text;
 	}
 private:
-	size_t pos = 0;
+	size_t pos;
 	string text;
-	string_view buffer;
-	bool flag;
+	char* buffer = new char[1000000];
+
 };
 
 void TypeText(Editor& editor, const string& text) {
@@ -142,8 +149,27 @@ void TestEmptyBuffer() {
 int main() {
   TestRunner tr;
   RUN_TEST(tr, TestEditing);
-  RUN_TEST(tr, TestReverse);
-  RUN_TEST(tr, TestNoText);
-  RUN_TEST(tr, TestEmptyBuffer);
+//  RUN_TEST(tr, TestReverse);
+//  RUN_TEST(tr, TestNoText);
+//  RUN_TEST(tr, TestEmptyBuffer);
+//	Editor editor;
+//
+//	const size_t text_len = 12;
+//	const size_t first_part_len = 7;
+//	TypeText(editor, "hello, world");
+//	for (size_t i = 0; i < text_len; ++i) {
+//		editor.Left();
+//	}
+//	editor.Cut(first_part_len);
+//	for (size_t i = 0; i < text_len - first_part_len; ++i) {
+//		editor.Right();
+//	}
+//	TypeText(editor, ", ");
+//	editor.Paste();
+//	editor.Left();
+//	editor.Left();
+//	editor.Cut(3);
+//
+//	ASSERT_EQUAL(editor.GetText(), "world, hello");
   return 0;
 }

@@ -7,22 +7,24 @@ using namespace std;
 class Editor {
 public:
 	// Реализуйте конструктор по умолчанию и объявленные методы
-	Editor(): text{}, buffer{} {
+	Editor(): text{} {
 		pos = 0;
 	}
 
-	void Left() {   		// сдвинуть курсор влево
+	// сдвинуть курсор влево
+	void Left() {
 		if (pos == 0) {
 			return;
 		}
 		--pos;
 	}
 
-	void Right() {  		// сдвинуть курсор вправо
+	// сдвинуть курсор вправо
+	void Right(size_t p = 1) {
 		if(pos == text.size()) {
 			return;
 		}
-		++pos;
+		pos+=p;
 	}
 
 	// вставить символ token
@@ -33,28 +35,37 @@ public:
 
 	// cкопировать не более tokens символов,  начиная с текущей позиции курсора
 	void Copy(size_t tokens) {
-		text.copy(buffer, tokens, pos);
+		buffer = text.substr(pos, tokens);
 	}
 
 	// вырезать не более tokens символов, начиная с текущей позиции курсора
 	void Cut(size_t tokens) {
-		text.copy(buffer, tokens, pos);
+		Copy(tokens);
 		text.erase(pos, tokens);
 	}
 
 	// вставить содержимое буфера в текущую позицию курсора
 	void Paste() {
 		text.insert(pos, buffer);
+		Right(buffer.size());
 	}
 
 	string GetText() const {  // получить текущее содержимое текстового редактора
 		return text;
 	}
+
+	void ShowPos() const {
+		cout << "Current Position (pos/lenght): " << pos << '/' << text.size() << endl;
+	}
+
+	void ShowBuffer() const {
+		cout << "Buffer: " << buffer << endl;
+	}
+
 private:
 	size_t pos;
 	string text;
-	char* buffer = new char[1000000];
-
+	string buffer;
 };
 
 void TypeText(Editor& editor, const string& text) {
@@ -69,7 +80,7 @@ void TestEditing() {
 
     const size_t text_len = 12;
     const size_t first_part_len = 7;
-    TypeText(editor, "hello, world");
+    TypeText(editor, "hello,.world");
     for(size_t i = 0; i < text_len; ++i) {
       editor.Left();
     }
@@ -77,13 +88,13 @@ void TestEditing() {
     for(size_t i = 0; i < text_len - first_part_len; ++i) {
       editor.Right();
     }
-    TypeText(editor, ", ");
+    TypeText(editor, ",.");
     editor.Paste();
     editor.Left();
     editor.Left();
     editor.Cut(3);
     
-    ASSERT_EQUAL(editor.GetText(), "world, hello");
+    ASSERT_EQUAL(editor.GetText(), "world,.hello");
   }
   {
     Editor editor;
@@ -149,27 +160,9 @@ void TestEmptyBuffer() {
 int main() {
   TestRunner tr;
   RUN_TEST(tr, TestEditing);
-//  RUN_TEST(tr, TestReverse);
-//  RUN_TEST(tr, TestNoText);
-//  RUN_TEST(tr, TestEmptyBuffer);
-//	Editor editor;
-//
-//	const size_t text_len = 12;
-//	const size_t first_part_len = 7;
-//	TypeText(editor, "hello, world");
-//	for (size_t i = 0; i < text_len; ++i) {
-//		editor.Left();
-//	}
-//	editor.Cut(first_part_len);
-//	for (size_t i = 0; i < text_len - first_part_len; ++i) {
-//		editor.Right();
-//	}
-//	TypeText(editor, ", ");
-//	editor.Paste();
-//	editor.Left();
-//	editor.Left();
-//	editor.Cut(3);
-//
-//	ASSERT_EQUAL(editor.GetText(), "world, hello");
+  RUN_TEST(tr, TestReverse);
+  RUN_TEST(tr, TestNoText);
+  RUN_TEST(tr, TestEmptyBuffer);
+
   return 0;
 }

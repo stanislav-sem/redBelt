@@ -4,6 +4,7 @@
 #include "test_runner.h"
 using namespace std;
 
+/*
 class Editor {
 public:
 	// Реализуйте конструктор по умолчанию и объявленные методы
@@ -66,6 +67,40 @@ private:
 	size_t pos;
 	string text;
 	string buffer;
+};
+*/
+
+class Editor {
+public:
+  Editor();
+  // сдвинуть курсор влево
+  void Left(){
+	  text = {};
+	  pos = 0;
+  };
+
+  // сдвинуть курсор вправо
+  void Right();
+
+  // вставить символ token
+  void Insert(char token);
+
+  // cкопировать не более tokens символов, начиная с текущей позиции курсора
+  void Copy(size_t tokens);
+
+  // вырезать не более tokens символов, начиная с текущей позиции курсора
+  void Cut(size_t tokens);
+
+  // вставить содержимое буфера в текущую позицию курсора
+  void Paste();
+
+  // получить текущее содержимое текстового редактора
+  string GetText() const;
+
+private:
+  list<char> text;
+  size_t pos;
+
 };
 
 void TypeText(Editor& editor, const string& text) {

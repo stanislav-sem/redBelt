@@ -4,96 +4,32 @@
 #include "test_runner.h"
 using namespace std;
 
-/*
-class Editor {
-public:
-	// Реализуйте конструктор по умолчанию и объявленные методы
-	Editor(): text{} {
-		pos = 0;
-	}
-
-	// сдвинуть курсор влево
-	void Left() {
-		if (pos == 0) {
-			return;
-		}
-		--pos;
-	}
-
-	// сдвинуть курсор вправо
-	void Right(size_t p = 1) {
-		if(pos == text.size()) {
-			return;
-		}
-		pos+=p;
-	}
-
-	// вставить символ token
-	void Insert(char token) {
-		text.insert(pos, 1, token);
-		Right();
-	}
-
-	// cкопировать не более tokens символов,  начиная с текущей позиции курсора
-	void Copy(size_t tokens) {
-		buffer = text.substr(pos, tokens);
-	}
-
-	// вырезать не более tokens символов, начиная с текущей позиции курсора
-	void Cut(size_t tokens) {
-		Copy(tokens);
-		text.erase(pos, tokens);
-	}
-
-	// вставить содержимое буфера в текущую позицию курсора
-	void Paste() {
-		text.insert(pos, buffer);
-		Right(buffer.size());
-	}
-
-	string GetText() const {  // получить текущее содержимое текстового редактора
-		return text;
-	}
-
-	void ShowPos() const {
-		cout << "Current Position (pos/lenght): " << pos << '/' << text.size() << endl;
-	}
-
-	void ShowBuffer() const {
-		cout << "Buffer: " << buffer << endl;
-	}
-
-private:
-	size_t pos;
-	string text;
-	string buffer;
-};
-*/
+using IT = list<char>::iterator;
 
 class Editor {
 public:
   Editor() : text{} {
-	  pos = text.begin();
+	  pos = 0;
   }
 
   // сдвинуть курсор влево
   void Left() {
-	  if (pos != text.begin()) {
-		  --pos;
+	  if (pos != 0) {
+		  pos--;
 	  }
   }
 
   // сдвинуть курсор вправо
   void Right() {
-	  if (pos != text.end()) {
-		  ++pos;
+	  if (pos != text.size()) {
+		  pos++;
 	  }
   }
 
   // вставить символ token
   void Insert(char token) {
-	  text.insert(pos, token);
-  }
+	  text.insert(GetIt(), token);
+   }
 
   // cкопировать не более tokens символов, начиная с текущей позиции курсора
   void Copy(size_t tokens) {
@@ -110,7 +46,8 @@ public:
 		  buffer.push_back(*pos);
 		  text.erase(pos);
 	  }
-  }
+//	  cout << "Text: " << GetText() << endl;
+   }
 
   // вставить содержимое буфера в текущую позицию курсора
   void Paste() {
@@ -119,17 +56,21 @@ public:
 
   // получить текущее содержимое текстового редактора
   string GetText() const {
-	  string result;
-	  for (auto el : text) {
-		  result += el;
-	  }
-	  return result;
+	  return {text.begin(), text.end()};
   }
 
 private:
   list<char> text;
   list<char> buffer;
-  list<char>::iterator pos;
+  size_t pos;
+
+  IT GetIt(size_t input = pos) {
+	  IT result = text.begin();
+	  for (size_t i = 0; i != input; i++) {
+		  result++;
+	  }
+	  return result;
+  }
 
 };
 
@@ -141,15 +82,22 @@ void TypeText(Editor& editor, const string& text) {
 
 void TestEditing() {
   {
-    Editor editor;
+	Editor editor;
 
     const size_t text_len = 12;
     const size_t first_part_len = 7;
     TypeText(editor, "hello,.world");
+//    cout << editor.GetText() << endl;
+//    cout << "Current pos: " << editor.GetPos() << endl;
     for(size_t i = 0; i < text_len; ++i) {
       editor.Left();
     }
+
+
     editor.Cut(first_part_len);
+    cout << editor.GetText() << endl;
+//    cout << "Current pos: " << editor.GetPos() << endl;
+
     for(size_t i = 0; i < text_len - first_part_len; ++i) {
       editor.Right();
     }
@@ -158,7 +106,6 @@ void TestEditing() {
     editor.Left();
     editor.Left();
     editor.Cut(3);
-    
     ASSERT_EQUAL(editor.GetText(), "world,.hello");
   }
   {

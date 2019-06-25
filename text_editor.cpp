@@ -72,34 +72,64 @@ private:
 
 class Editor {
 public:
-  Editor();
+  Editor() : text{} {
+	  pos = text.begin();
+  }
+
   // сдвинуть курсор влево
-  void Left(){
-	  text = {};
-	  pos = 0;
-  };
+  void Left() {
+	  if (pos != text.begin()) {
+		  --pos;
+	  }
+  }
 
   // сдвинуть курсор вправо
-  void Right();
+  void Right() {
+	  if (pos != text.end()) {
+		  ++pos;
+	  }
+  }
 
   // вставить символ token
-  void Insert(char token);
+  void Insert(char token) {
+	  text.insert(pos, token);
+  }
 
   // cкопировать не более tokens символов, начиная с текущей позиции курсора
-  void Copy(size_t tokens);
+  void Copy(size_t tokens) {
+	  list<char>::iterator destPos = pos;
+	  for (size_t i = 0; i < tokens; ++i) {
+		  buffer.push_back(*destPos);
+		  ++destPos;
+	  }
+  }
 
   // вырезать не более tokens символов, начиная с текущей позиции курсора
-  void Cut(size_t tokens);
+  void Cut(size_t tokens) {
+	  for (size_t i = 0; i < tokens; ++i) {
+		  buffer.push_back(*pos);
+		  text.erase(pos);
+	  }
+  }
 
   // вставить содержимое буфера в текущую позицию курсора
-  void Paste();
+  void Paste() {
+	  text.insert(pos, buffer.begin(), buffer.end());
+  }
 
   // получить текущее содержимое текстового редактора
-  string GetText() const;
+  string GetText() const {
+	  string result;
+	  for (auto el : text) {
+		  result += el;
+	  }
+	  return result;
+  }
 
 private:
   list<char> text;
-  size_t pos;
+  list<char> buffer;
+  list<char>::iterator pos;
 
 };
 

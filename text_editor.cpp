@@ -8,6 +8,7 @@ using IT = list<char>::iterator;
 
 class Editor {
 public:
+<<<<<<< HEAD
   Editor() : text{} {
 	  pos = 0;
   }
@@ -30,17 +31,26 @@ public:
   void Insert(char token) {
 	  text.insert(GetIt(), token);
    }
+=======
+  Editor();
+  // сдвинуть курсор влево
+  void Left(){
+	  text = {};
+	  pos = 0;
+  };
+
+  // сдвинуть курсор вправо
+  void Right();
+
+  // вставить символ token
+  void Insert(char token);
+>>>>>>> parent of 5ecb0c8... Update text_editor.cpp
 
   // cкопировать не более tokens символов, начиная с текущей позиции курсора
-  void Copy(size_t tokens) {
-	  list<char>::iterator destPos = pos;
-	  for (size_t i = 0; i < tokens; ++i) {
-		  buffer.push_back(*destPos);
-		  ++destPos;
-	  }
-  }
+  void Copy(size_t tokens);
 
   // вырезать не более tokens символов, начиная с текущей позиции курсора
+<<<<<<< HEAD
   void Cut(size_t tokens) {
 	  for (size_t i = 0; i < tokens; ++i) {
 		  buffer.push_back(*pos);
@@ -48,13 +58,15 @@ public:
 	  }
 //	  cout << "Text: " << GetText() << endl;
    }
+=======
+  void Cut(size_t tokens);
+>>>>>>> parent of 5ecb0c8... Update text_editor.cpp
 
   // вставить содержимое буфера в текущую позицию курсора
-  void Paste() {
-	  text.insert(pos, buffer.begin(), buffer.end());
-  }
+  void Paste();
 
   // получить текущее содержимое текстового редактора
+<<<<<<< HEAD
   string GetText() const {
 	  return {text.begin(), text.end()};
   }
@@ -71,6 +83,13 @@ private:
 	  }
 	  return result;
   }
+=======
+  string GetText() const;
+
+private:
+  list<char> text;
+  size_t pos;
+>>>>>>> parent of 5ecb0c8... Update text_editor.cpp
 
 };
 

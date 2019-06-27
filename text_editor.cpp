@@ -4,62 +4,59 @@
 using namespace std;
 
 class Editor {
- public:
-  // Реализуйте конструктор по умолчанию и объявленные методы
-  Editor(): text{}, buffer{} {
-	  curPos = text.begin();
+public:
+  Editor()
+    : pos(text.end()) {
   }
 
   void Left() {
-	  if (curPos != text.begin())
-	  {
-		  curPos--;
-	  }
+    pos = Advance(pos, -1);
   }
 
-  void Right(size_t input = 1) {
-	  if (curPos != text.end()) {
-		  advance(curPos, input);
-	  }
+  void Right() {
+    pos = Advance(pos, 1);
   }
 
   void Insert(char token) {
-	  text.insert(curPos, token);
+    text.insert(pos, token);
   }
 
   void Cut(size_t tokens = 1) {
-	  list<char>::iterator tmpPos{curPos};
-	  list<char>::iterator tmpCur{curPos};
-	  advance(tmpPos, tokens);
-	  advance(tmpCur, tokens+1);
-	  buffer.splice(buffer.begin(), text, curPos, tmpPos);
-
-//	  buffer = {curPos,  tmpPos};
-//	  textdata.erase(curPos, tmpPos);
+    auto pos2 = Advance(pos, tokens);
+    buffer.assign(pos, pos2);
+    pos = text.erase(pos, pos2);
   }
 
   void Copy(size_t tokens = 1) {
-	  list<char>::iterator tmpPos{curPos};
-	  advance(tmpPos, tokens);
-	  buffer = {curPos, tmpPos};
+    auto pos2 = Advance(pos, tokens);
+    buffer.assign(pos, pos2);
   }
 
   void Paste() {
-	  text.insert(curPos, buffer.begin(), buffer.end());
+    text.insert(pos, buffer.begin(), buffer.end());
   }
 
   string GetText() const {
-	  return {text.begin(), text.end()};
+    return {text.begin(), text.end()};
   }
 
-  string GetBuffer() const {
-	  return {buffer.begin(), buffer.end()};
-  }
-
- private:
+private:
+  using Iterator = list<char>::iterator;
   list<char> text;
   list<char> buffer;
-  list<char>::iterator curPos;
+  Iterator pos;
+
+  Iterator Advance(Iterator it, int steps) const {
+    while (steps > 0 && it != text.end()) {
+      ++it;
+      --steps;
+    }
+    while (steps < 0 && it != text.begin()) {
+      --it;
+      ++steps;
+    }
+    return it;
+  }
 };
 
 void TypeText(Editor& editor, const string& text) {
@@ -79,23 +76,26 @@ void TestEditing() {
       editor.Left();
     }
     editor.Cut(first_part_len);
-    cout << "text: " << editor.GetText() << endl;
-    cout << "buffer: " << editor.GetBuffer() << endl;
+
     for(size_t i = 0; i < text_len - first_part_len; ++i) {
       editor.Right();
     }
     TypeText(editor, ",.");
-    cout << "Typing" << endl;
-    cout << "text: " << editor.GetText() << endl;
-    cout << "buffer: " << editor.GetBuffer() << endl;
+//    cout << "Typing" << endl;
+//    cout << "text: " << editor.GetText() << endl;
+//    cout << "buffer: " << editor.GetBuffer() << endl;
     editor.Paste();
-    cout << "Pasting" << endl;
-    cout << "text: " << editor.GetText() << endl;
-    cout << "buffer: " << editor.GetBuffer() << endl;
+//    cout << "Pasting" << endl;
+//    cout << "text: " << editor.GetText() << endl;
+//    cout << "buffer: " << editor.GetBuffer() << endl;
+//    cout << "Left" << endl;
     editor.Left();
     editor.Left();
+//    cout << "cuting 3" << endl;
     editor.Cut(3);
-    
+//    cout << "text: " << editor.GetText() << endl;
+//    cout << "buffer: " << editor.GetBuffer() << endl;
+//    cout << "Asserting" << endl;
     ASSERT_EQUAL(editor.GetText(), "world,.hello");
   }
   {

@@ -6,33 +6,36 @@ using namespace std;
 class Editor {
  public:
   // Реализуйте конструктор по умолчанию и объявленные методы
-  Editor(): textdata{}, buffer{} {
-	  curPos = textdata.begin();
+  Editor(): text{}, buffer{} {
+	  curPos = text.begin();
   }
 
   void Left() {
-	  if (curPos != textdata.begin())
+	  if (curPos != text.begin())
 	  {
 		  curPos--;
 	  }
   }
 
   void Right(size_t input = 1) {
-	  if (curPos != textdata.end()) {
+	  if (curPos != text.end()) {
 		  advance(curPos, input);
 	  }
   }
 
   void Insert(char token) {
-	  textdata.insert(curPos, token);
+	  text.insert(curPos, token);
   }
 
   void Cut(size_t tokens = 1) {
 	  list<char>::iterator tmpPos{curPos};
+	  list<char>::iterator tmpCur{curPos};
 	  advance(tmpPos, tokens);
-//	  buffer.splice(buffer.begin(), textdata, curPos, tmpPos);
-	  buffer = {curPos,  tmpPos};
-	  textdata.erase(curPos, tmpPos);
+	  advance(tmpCur, tokens+1);
+	  buffer.splice(buffer.begin(), text, curPos, tmpPos);
+
+//	  buffer = {curPos,  tmpPos};
+//	  textdata.erase(curPos, tmpPos);
   }
 
   void Copy(size_t tokens = 1) {
@@ -42,11 +45,11 @@ class Editor {
   }
 
   void Paste() {
-	  textdata.insert(curPos, buffer.begin(), buffer.end());
+	  text.insert(curPos, buffer.begin(), buffer.end());
   }
 
   string GetText() const {
-	  return {textdata.begin(), textdata.end()};
+	  return {text.begin(), text.end()};
   }
 
   string GetBuffer() const {
@@ -54,7 +57,7 @@ class Editor {
   }
 
  private:
-  list<char> textdata;
+  list<char> text;
   list<char> buffer;
   list<char>::iterator curPos;
 };

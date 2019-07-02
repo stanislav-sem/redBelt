@@ -25,20 +25,26 @@ void PrintVec(const vector<int>& input) {
 template <typename RandomIt>
 void MakeJosephusPermutation(RandomIt first, RandomIt last, uint32_t step_size) {
   vector<typename RandomIt::value_type> pool(first, last);
-  cout << "Input vector: ";
-  PrintVec(pool);
+  cout << "Begin:	  "; PrintVec(pool);
   size_t cur_pos = 0;
   while (!pool.empty()) {
+    cout << "cur_pos=" << cur_pos << ' ';
     *(first++) = pool[cur_pos];
     pool.erase(pool.begin() + cur_pos);
     if (pool.empty()) {
       break;
     }
-    cur_pos = (cur_pos + step_size - 1) % pool.size();
-    cout << "cur_pos=" << cur_pos << ". Vector=";
     PrintVec(pool);
+    cur_pos = (cur_pos + step_size - 1) % pool.size();
   }
+  cout << "\n\n";
 }
+
+//template <typename RandomIt>
+//void MakeJosephusPermutation(RandomIt first, RandomIt last, uint32_t step_size) {
+//	list<typename RandomIt::value_type> pool(first, last);
+//
+//}
 
 vector<int> MakeTestVector() {
   vector<int> numbers(10);

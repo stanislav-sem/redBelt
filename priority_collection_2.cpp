@@ -18,14 +18,15 @@ public:
   const size_t MAX_ELEMENTS = 1'000'000; // максимальное количество элементов
 
   PriorityCollection () {
-	  priority[0].reserve(MAX_ELEMENTS);
+	  vec_priority[0].reserve(MAX_ELEMENTS);
   }
 
   // Добавить объект с нулевым приоритетом
   // с помощью перемещения и вернуть его идентификатор
   Id Add(T object) {
 	  Id result = objects.insert(move(object)).first;
-	  priority[0].push_back(result);
+	  vec_priority[0].push_back(result);
+	  map_priority[result] = 0;
 	  return result;
   }
 
@@ -36,8 +37,7 @@ public:
   void Add(ObjInputIt range_begin, ObjInputIt range_end,
            IdOutputIt ids_begin) {
 	  for (auto it = range_begin; it != range_end; ++it) {
-		  Id tmp_id = Add(*it);
-		  *ids_begin = tmp_id;
+		  *ids_begin = Add(*it);
 		  ids_begin++;
 	  }
   }
@@ -55,26 +55,35 @@ public:
 
   // Увеличить приоритет объекта на 1
   void Promote(Id id) {
-      Id tmp_id;
-	  for (auto el : priority) {
-		  for (size_t i = 0; i < el.second.size(); ++i) {
-			  if (el.second[i] == id) {
-				  tmp_id = id;
-			  }
-		  }
-	  }
+     int priority = map_priority[id]++;
+     auto it = find(vec_priority[priority].begin(), vec_priority[priority].end(), id);
+     vec_priority[priority].erase(it);
+
+     if (vec_priority.size() <= ++priority) {
+    	 vec_priority.push_back({id});
+     } else {
+    	 vec_priority[priority].push_back(id);
+     }
   }
 
   // Получить объект с максимальным приоритетом и его приоритет
-  pair<const T&, int> GetMax() const;
+  pair<const T&, int> GetMax() const {
+	  return make_pair(vec_priority.back().back(), vec_priority.size()-1);
+  }
 
   // Аналогично GetMax, но удаляет элемент из контейнера
-  pair<T, int> PopMax();
+  pair<T, int> PopMax() {
+	  Id id = vec_priority.back().back();
+	  int priority = map_priority[id];
+	  vec_priority.back().erase(vec_priority.back().end() - 1);
+	  map_priority[id] = 0;
+	  return make_pair(move(*id), priority);
+  }
 
 private:
   set<T> objects;
-  // в map: ключ это приоритет, значение - вектор элементов с приоритетом = ключу
-  map<int, vector<Id>> priority;
+  vector<vector<Id>> vec_priority;
+  map<Id, int> map_priority;
 };
 
 

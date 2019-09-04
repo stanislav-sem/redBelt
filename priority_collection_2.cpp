@@ -14,19 +14,18 @@ using namespace std;
 template <typename T>
 class PriorityCollection {
 public:
-  using Id = typename set<T>::iterator;
+  using Id = typename map<T, int>::iterator;
   const size_t MAX_ELEMENTS = 1'000'000; // максимальное количество элементов
 
   PriorityCollection () {
-	  vec_priority[0].reserve(MAX_ELEMENTS);
+	  priorities[0].reserve(MAX_ELEMENTS);
   }
 
   // Добавить объект с нулевым приоритетом
   // с помощью перемещения и вернуть его идентификатор
   Id Add(T object) {
-	  Id result = objects.insert(move(object)).first;
-	  vec_priority[0].push_back(result);
-	  map_priority[result] = 0;
+	  Id result = (container.insert({move(object), 0})).first;
+	  priorities[0].push_back(result);
 	  return result;
   }
 
@@ -45,46 +44,50 @@ public:
   // Определить, принадлежит ли идентификатор какому-либо
   // хранящемуся в контейнере объекту
   bool IsValid(Id id) const {
-	  return id >= objects.begin() && id < objects.end();
+	  return id >= container.begin() && id < container.end();
   }
 
   // Получить объект по идентификатору
   const T& Get(Id id) const {
-	  return *id;
+	  return (*id)->first;
   }
 
   // Увеличить приоритет объекта на 1
   void Promote(Id id) {
-     int priority = map_priority[id]++;
-     auto it = find(vec_priority[priority].begin(), vec_priority[priority].end(), id);
-     vec_priority[priority].erase(it);
-
-     if (vec_priority.size() <= ++priority) {
-    	 vec_priority.push_back({id});
-     } else {
-    	 vec_priority[priority].push_back(id);
-     }
+	  (*id).second++;
+	  for (auto it1 = priorities.begin(); it1 != priorities.end(); ++it1) {
+		  auto it2 = find((*it1).begin(), (*it1).end(), id);
+		  if (it2 != (*it1).end()) {
+			  (*it1).erase(it2);
+			  ++it1;
+			  (*it1).push_back(id);
+			  return;
+		  }
+	  }
   }
 
   // Получить объект с максимальным приоритетом и его приоритет
   pair<const T&, int> GetMax() const {
-	  return make_pair(vec_priority.back().back(), vec_priority.size()-1);
+	  Id id = priorities.back().back();
+	  return *id;
   }
 
   // Аналогично GetMax, но удаляет элемент из контейнера
   pair<T, int> PopMax() {
-	  Id id = vec_priority.back().back();
-	  int priority = map_priority[id];
-	  vec_priority.back().erase(vec_priority.back().end() - 1);
-	  map_priority[id] = 0;
-	  return make_pair(move(*id), priority);
+	 Id id = priorities.back().back();
+	 priorities.back().pop_back();
+	 auto tmp = priorities.extract(id);
   }
 
 private:
-  set<T> objects;
-  vector<vector<Id>> vec_priority;
-  map<Id, int> map_priority;
+//  set<T> objects;
+//  vector<vector<Id>> vec_priority;
+//  map<Id, int> map_priority;
+  map<T, int> container;
+  vector<vector<Id>> priorities;
+
 };
+
 
 
 class StringNonCopyable : public string {

@@ -64,7 +64,9 @@ public:
 
   // Получить объект с максимальным приоритетом и его приоритет
   pair<const T&, int> GetMax() const {
-
+	  auto it = max(priorities.begin(), priorities.end());
+	  Id id = (*it).second;
+	  return objects[id];
   }
 
   // Аналогично GetMax, но удаляет элемент из контейнера

@@ -1,4 +1,3 @@
-#include "test_runner.h"
 #include <algorithm>
 #include <iostream>
 #include <iterator>
@@ -7,76 +6,84 @@
 #include <utility>
 #include <vector>
 #include <map>
-#include <string>
+
+#include "test_runner.h"
 
 using namespace std;
 
 template <typename T>
 class PriorityCollection {
 public:
-//  using Id = typename map<T, int>::iterator;
-  using Id = size_t;
-  const size_t MAX_ELEMENTS = 1'000'000; // максимальное количество элементов
 
-  PriorityCollection () {
-	  objects.reserve(MAX_ELEMENTS);
-  }
+    PriorityCollection() {
+        objects.reserve(1'000'000);
+    }
 
-  // Добавить объект с нулевым приоритетом
-  // с помощью перемещения и вернуть его идентификатор
-  Id Add(T object) {
-	  objects.push_back({move(object), 0});
-	  Id id = objects.size() - 1;
-	  priorities.insert({0, id});
-	  return id;
-  }
+    using Id = int;
+    using IT = set<pair<int, Id>>::iterator;
 
-  // Добавить все элементы диапазона [range_begin, range_end)
-  // с помощью перемещения, записав выданные им идентификаторы
-  // в диапазон [ids_begin, ...)
-  template <typename ObjInputIt, typename IdOutputIt>
-  void Add(ObjInputIt range_begin, ObjInputIt range_end, IdOutputIt ids_begin) {
-	  for (auto it = range_begin; it != range_end; ++it) {
-		  Id id = Add(*it);
-		  *ids_begin = id;
-		  ++ids_begin;
-	  }
-  }
+    Id Add(T object) {
+        objects.push_back({ move(object), priorities.end()});
+        IT it = (priorities.insert({ 0, id })).first;
+        objects.back().second = it;
+        return id++;
+    }
 
-  // Определить, принадлежит ли идентификатор какому-либо
-  // хранящемуся в контейнере объекту
-  bool IsValid(Id id) const {
-	  return id <= objects.size();
-  }
+    template <typename ObjInputIt, typename IdOutputIt>
+    void Add(ObjInputIt range_begin, ObjInputIt range_end,
+        IdOutputIt ids_begin) {
+        for (auto it = make_move_iterator(range_begin);
+            it != make_move_iterator(range_end); ++it) {
+            *(ids_begin++) = Add(*it);
+        }
+    }
 
+    bool IsValid(Id id) const {
+        if (id > objects.size() - 1) {
+            return false;
+        }
+        return objects[id].second != priorities.end();
+    }
 
-  // Получить объект по идентификатору
-  const T& Get(Id id) const {
-	  return objects[id].first;
-  }
+    const T& Get(Id id) const {
+        return objects[id].first;
+    }
 
-  // Увеличить приоритет объекта на 1
-  void Promote(Id id) {
-      Id prev_prior = objects[id].second++;
-      priorities.erase({prev_prior, id});
-      priorities.insert({++prev_prior, id});
-  }
+    void Promote(Id id) {
+//        auto tmp = GetPriority(id);
+//        priorities.erase(tmp);
+//        tmp.first++;
+//        objects[id].second;
+//        priorities.insert({(tmp.first), tmp.second});
+       IT it_old = objects[id].second;
+       int tmp_priority = (*it_old).first;
+       priorities.erase(it_old);
+       IT it_new = (priorities.insert({ ++tmp_priority, id })).first;
+       objects[id].second = it_new;
+    }
 
-  // Получить объект с максимальным приоритетом и его приоритет
-  pair<const T&, int> GetMax() const {
-	  auto it = max(priorities.begin(), priorities.end());
-	  Id id = (*it).second;
-	  return objects[id];
-  }
+    pair<const T&, int> GetMax() const {
+        auto max_it = prev(priorities.end());
+        return { objects[max_it->second].first, max_it->first};
+    }
 
-  // Аналогично GetMax, но удаляет элемент из контейнера
-  pair<T, int> PopMax() {
-
-  }
+    pair<T, int> PopMax() {
+        auto it = prev(priorities.end());
+        int priority = it->first;
+        Id max_id = it->second;
+        priorities.erase(it);
+        objects[max_id].second = priorities.end();
+        return { move(objects[max_id].first), priority};
+    }
 
 private:
-  vector<pair<T, int>> objects;
-  set<pair<int, Id>> priorities;
+    Id id = 0;
+    set<pair<int, Id>> priorities;
+    vector<pair<T, IT>> objects;
+
+    pair<int, Id> GetPriority(Id id) {
+    	return {objects[id].second, id};
+    }
 };
 
 
